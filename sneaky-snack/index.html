@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>선생님 몰래 간식 먹기</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Jua&display=swap">
+<style>
+:root{
+  color-scheme: light;
+  --page:#E4F1EA; --ink:#1D2B33; --ink-soft:#4F636A; --panel:#FFFFFF; --panel-line:#C5D1D4;
+  --steel:#D5DEE1; --p1:#2F6FDB; --p2:#E2483D; --p2-soft:#FBE0DD; --gold:#F2B21B; --alert:#E2483D;
+  --scrim:rgba(228,241,234,.93); --key:#F7FAFA; --key-edge:#A9B8BC; --shadow:rgba(29,43,51,.18);
+  /* 교실 장면 색 */
+  --wall:#DCEBE3; --wall-trim:#BFD8CB; --floor:#D8B386; --floor-line:#C69C6D;
+  --board:#2F5D50; --board-frame:#9A6B43; --chalk:#F3F1E7; --teacher:#5B7FA6; --hair:#2E2620;
+  --desk:#EBCFA3; --desk-edge:#C9A06E; --npc:#9DB3AC; --glass:#C6E4F4; --frame:#FFFFFF;
+  --font-display:"Black Han Sans","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  --font-ui:"Jua","Apple SD Gothic Neo","Malgun Gothic",sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --page:#0E1D19; --ink:#E8F1ED; --ink-soft:#A5BAB2; --panel:#16302A; --panel-line:#2B4A42;
+    --steel:#2A4540; --p1:#6E9DF0; --p2:#F2766C; --p2-soft:#4A2522; --gold:#F6C548; --alert:#F2766C;
+    --scrim:rgba(14,29,25,.93); --key:#21403A; --key-edge:#3E6158; --shadow:rgba(0,0,0,.35);
+    --wall:#1B2B26; --wall-trim:#22382F; --floor:#4A3826; --floor-line:#3A2B1D;
+    --board:#1D3F36; --board-frame:#6E4B2F; --chalk:#E2E0D3; --teacher:#4A6A8E; --hair:#0F0C0A;
+    --desk:#7A6347; --desk-edge:#5C4A34; --npc:#4C635D; --glass:#284658; --frame:#3A5A52;
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --page:#0E1D19; --ink:#E8F1ED; --ink-soft:#A5BAB2; --panel:#16302A; --panel-line:#2B4A42;
+  --steel:#2A4540; --p1:#6E9DF0; --p2:#F2766C; --p2-soft:#4A2522; --gold:#F6C548; --alert:#F2766C;
+  --scrim:rgba(14,29,25,.93); --key:#21403A; --key-edge:#3E6158; --shadow:rgba(0,0,0,.35);
+  --wall:#1B2B26; --wall-trim:#22382F; --floor:#4A3826; --floor-line:#3A2B1D;
+  --board:#1D3F36; --board-frame:#6E4B2F; --chalk:#E2E0D3; --teacher:#4A6A8E; --hair:#0F0C0A;
+  --desk:#7A6347; --desk-edge:#5C4A34; --npc:#4C635D; --glass:#284658; --frame:#3A5A52;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{
+  height:100%;margin:0;background:var(--page);color:var(--ink);font-family:var(--font-ui);
+  display:flex;flex-direction:column;overflow:hidden;-webkit-user-select:none;user-select:none;
+}
+
+/* 점수판 */
+.hud{
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:clamp(8px,2vw,24px);
+  padding:clamp(8px,1.4vw,14px) clamp(12px,2.4vw,28px);
+  background:var(--panel);border-bottom:3px solid var(--panel-line);
+}
+.side{display:flex;align-items:center;gap:clamp(8px,1.2vw,16px);min-width:0}
+.side.p2{flex-direction:row-reverse}
+.face{font-size:clamp(28px,4vw,46px);line-height:1}
+.who{display:flex;flex-direction:column;line-height:1.15}
+.side.p2 .who,.side.p2 .meta{text-align:right}
+.tag{font-family:var(--font-display);font-size:clamp(17px,2vw,24px)}
+.p1 .tag{color:var(--p1)}
+.p2 .tag{color:var(--p2)}
+.keys-hint{font-size:clamp(12px,1.2vw,15px);color:var(--ink-soft)}
+.score{
+  display:inline-block;font-family:var(--font-display);font-size:clamp(36px,5.6vw,68px);
+  line-height:1;min-width:2ch;text-align:center;font-variant-numeric:tabular-nums;
+}
+.p1 .score{color:var(--p1)}
+.p2 .score{color:var(--p2)}
+.score.kick{animation:kick .25s ease-out}
+@keyframes kick{0%{transform:scale(1.25)}100%{transform:scale(1)}}
+.meta{display:flex;flex-direction:column;line-height:1.2}
+.status{font-family:var(--font-display);font-size:clamp(14px,1.5vw,18px);color:var(--alert);white-space:nowrap}
+.wins{font-size:clamp(13px,1.3vw,16px);color:var(--ink-soft);white-space:nowrap}
+.clock{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:clamp(110px,16vw,210px)}
+.time{font-family:var(--font-display);font-size:clamp(30px,4.4vw,54px);line-height:1;font-variant-numeric:tabular-nums}
+.bar{display:block;width:100%;height:10px;background:var(--steel);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;width:100%;background:var(--ink);transform-origin:left center}
+.clock.hurry .time{color:var(--alert)}
+.clock.hurry .bar i{background:var(--alert)}
+@media (max-width:560px){.who{display:none}}
+
+/* 게임 화면 */
+.stage{position:relative;flex:1;min-height:0;overflow:hidden}
+canvas{display:block;width:100%;height:100%}
+.banner{
+  position:absolute;left:50%;top:66%;z-index:4;pointer-events:none;text-align:center;
+  padding:14px 32px;border-radius:18px;background:var(--panel);
+  border:4px solid var(--ink);box-shadow:0 10px 0 var(--shadow);
+  opacity:0;transform:translate(-50%,-50%) scale(.6);
+  transition:opacity .15s ease, transform .3s cubic-bezier(.2,1.6,.4,1);
+}
+.banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+.b-title{font-family:var(--font-display);font-size:clamp(26px,4.6vw,54px);line-height:1.05;white-space:nowrap}
+.b-sub{font-size:clamp(16px,2.1vw,24px);margin-top:6px}
+.banner.alert{border-color:var(--alert);background:repeating-linear-gradient(-45deg,var(--panel) 0 18px,var(--p2-soft) 18px 36px)}
+.banner.alert .b-title{color:var(--alert)}
+.count{
+  position:absolute;inset:0;z-index:4;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:clamp(100px,22vw,260px);color:var(--ink);
+  text-shadow:.05em .05em 0 var(--gold);opacity:0;white-space:nowrap;
+}
+.count.long{font-size:clamp(60px,13vw,170px)}
+.count.pop{animation:pop .9s ease-out forwards}
+@keyframes pop{0%{opacity:0;transform:scale(1.8)}20%{opacity:1;transform:scale(1)}75%{opacity:1}100%{opacity:0;transform:scale(.92)}}
+
+/* 시작·결과 화면 */
+.overlay{
+  position:absolute;inset:0;z-index:5;display:flex;align-items:center;justify-content:center;
+  padding:clamp(14px,3vw,36px);background:var(--scrim);overflow:auto;
+}
+.overlay[hidden]{display:none}
+.card{text-align:center;max-width:780px;width:100%;margin:auto}
+.title{
+  font-family:var(--font-display);font-weight:400;font-size:clamp(50px,8.6vw,112px);line-height:1;margin:0;
+  color:var(--ink);text-shadow:.05em .05em 0 var(--gold);
+}
+.title span{display:block}
+.lead{font-size:clamp(18px,2.3vw,27px);margin:16px 0 22px}
+.controls{display:flex;justify-content:center;gap:clamp(12px,3vw,40px);flex-wrap:wrap;margin-bottom:18px}
+.ctl{
+  display:flex;flex-direction:column;align-items:center;gap:8px;min-width:150px;
+  padding:14px 22px;border-radius:16px;background:var(--panel);border:3px solid;
+}
+.ctl.p1{border-color:var(--p1)}
+.ctl.p2{border-color:var(--p2)}
+.ctl-head{font-family:var(--font-display);font-size:22px}
+.ctl.p1 .ctl-head{color:var(--p1)}
+.ctl.p2 .ctl-head{color:var(--p2)}
+.ctl-sub{font-size:16px;color:var(--ink-soft)}
+kbd{
+  display:inline-flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);color:var(--ink);
+  background:var(--key);border:2px solid var(--key-edge);border-bottom-width:5px;border-radius:8px;
+}
+kbd.big{width:64px;height:64px;font-size:32px;border-radius:12px;border-bottom-width:7px}
+.rules{
+  display:inline-block;max-width:100%;margin-bottom:12px;padding:10px 22px 12px;text-align:left;
+  background:var(--panel);border:3px solid var(--panel-line);border-radius:12px;
+}
+.rules-head{
+  font-family:var(--font-display);font-size:19px;text-align:center;
+  border-bottom:2px dashed var(--panel-line);padding-bottom:6px;margin-bottom:6px;
+}
+.rules ol{margin:0;padding-left:1.4em;font-size:clamp(16px,1.9vw,20px);line-height:1.55}
+.warn{color:var(--ink-soft);font-size:clamp(15px,1.7vw,19px);margin:0 0 20px}
+.btn{
+  display:inline-flex;align-items:center;gap:12px;cursor:pointer;
+  font-family:var(--font-display);font-size:clamp(22px,3vw,32px);
+  padding:14px 36px;border:none;border-radius:999px;background:var(--ink);color:var(--page);
+}
+.btn kbd{font-size:14px;padding:3px 8px;background:transparent;color:inherit;border:2px solid currentColor;border-radius:6px}
+.btn:focus-visible,.mute:focus-visible,.link-btn:focus-visible{outline:4px solid var(--gold);outline-offset:4px}
+.touch-note{margin:16px 0 0;color:var(--alert);font-size:17px}
+.kicker{font-size:clamp(19px,2.4vw,26px);color:var(--ink-soft);margin:0}
+.winner{font-family:var(--font-display);font-weight:400;font-size:clamp(60px,10vw,128px);margin:6px 0 12px;line-height:1}
+.winner.p1{color:var(--p1)}
+.winner.p2{color:var(--p2)}
+.final{
+  display:flex;justify-content:center;align-items:center;gap:18px;margin-bottom:10px;
+  font-family:var(--font-display);font-size:clamp(38px,6vw,68px);
+}
+.final .p1{color:var(--p1)}
+.final .p2{color:var(--p2)}
+.final b{font-weight:400}
+.vs{color:var(--ink-soft)}
+.caught{font-size:clamp(17px,2vw,21px);margin:0 0 4px}
+.tally{color:var(--ink-soft);font-size:18px;margin:0 0 22px}
+.link-btn{
+  margin-top:14px;background:none;border:none;cursor:pointer;
+  color:var(--ink-soft);font-family:var(--font-ui);font-size:16px;text-decoration:underline;
+}
+.mute{
+  position:absolute;right:14px;bottom:14px;z-index:6;width:46px;height:46px;cursor:pointer;
+  border-radius:50%;border:2px solid var(--panel-line);background:var(--panel);font-size:20px;
+}
+@media (prefers-reduced-motion: reduce){
+  .banner{transition:opacity .15s ease}
+  .score.kick{animation:none}
+  .count.pop{animation:fade .9s ease-out forwards}
+  @keyframes fade{0%{opacity:0}20%{opacity:1}75%{opacity:1}100%{opacity:0}}
+}
+</style>
+</head>
+<body>
+
+<header class="hud">
+  <div class="side p1">
+    <span class="face" id="face1" aria-hidden="true"></span>
+    <span class="who"><span class="tag">1P</span><span class="keys-hint" id="hint1"></span></span>
+    <span class="score" id="s1">0</span>
+    <span class="meta"><span class="status" id="st1"></span><span class="wins" id="w1"></span></span>
+  </div>
+  <div class="clock" id="clock">
+    <span class="time" id="time">40</span>
+    <span class="bar"><i id="barFill"></i></span>
+  </div>
+  <div class="side p2">
+    <span class="face" id="face2" aria-hidden="true"></span>
+    <span class="who"><span class="tag">2P</span><span class="keys-hint" id="hint2"></span></span>
+    <span class="score" id="s2">0</span>
+    <span class="meta"><span class="status" id="st2"></span><span class="wins" id="w2"></span></span>
+  </div>
+</header>
+
+<main class="stage" id="stage">
+  <canvas id="cv" aria-label="교실 게임 화면"></canvas>
+  <div class="banner" id="banner" aria-live="polite"><div class="b-title"></div><div class="b-sub"></div></div>
+  <div class="count" id="count" aria-hidden="true"></div>
+
+  <section class="overlay" id="startScreen">
+    <div class="card">
+      <h1 class="title"><span>선생님 몰래</span><span>간식 먹기</span></h1>
+      <p class="lead">키를 누르고 있으면 몰래 먹어요. 선생님이 돌아보면 손을 떼세요!</p>
+      <div class="controls">
+        <div class="ctl p1"><span class="ctl-head" id="head1"></span><kbd class="big" id="key1"></kbd><span class="ctl-sub">누르고 있으면 냠냠</span></div>
+        <div class="ctl p2"><span class="ctl-head" id="head2"></span><kbd class="big" id="key2"></kbd><span class="ctl-sub">누르고 있으면 냠냠</span></div>
+      </div>
+      <div><div class="rules"><div class="rules-head">규칙</div><ol id="rules"></ol></div></div>
+      <p class="warn">시간이 지날수록 선생님이 수상해집니다…</p>
+      <button class="btn" id="startBtn">시작하기 <kbd>Space</kbd></button>
+      <p class="touch-note" id="touchNote" hidden>키보드가 있는 컴퓨터에서 플레이하는 게임이에요.</p>
+    </div>
+  </section>
+
+  <section class="overlay" id="endScreen" hidden>
+    <div class="card">
+      <p class="kicker" id="kicker"></p>
+      <h2 class="winner" id="winner"></h2>
+      <div class="final">
+        <span class="p1"><span id="ff1"></span> <b id="f1">0</b></span>
+        <span class="vs">:</span>
+        <span class="p2"><b id="f2">0</b> <span id="ff2"></span></span>
+      </div>
+      <p class="caught" id="caught"></p>
+      <p class="tally" id="tally"></p>
+      <button class="btn" id="againBtn">다시 하기 <kbd>Space</kbd></button>
+      <div><button class="link-btn" id="resetBtn">전적 지우기</button></div>
+    </div>
+  </section>
+
+  <button class="mute" id="mute" aria-label="소리 끄기">🔊</button>
+</main>
+
+<script>
+// =====================================================
+//  선생님 몰래 간식 먹기 — 게임 설정
+//  아래 값만 바꿔도 게임이 달라집니다.
+// =====================================================
+const CONFIG = {
+  gameSeconds: 40,          // 한 판 시간(초)
+  fakeFrom: 25,             // 남은 시간이 이 값이 되면 선생님이 가짜로 돌아보기 시작
+  principalFrom: 10,        // 남은 시간이 이 값이 되면 교감선생님 순찰 시작
+  eatPerSecond: 3,          // 몰래 먹는 동안 1초에 오르는 점수
+  caughtPenalty: 5,         // 걸렸을 때 깎이는 점수
+  hallwaySeconds: 3,        // 걸렸을 때 복도에 서 있는 시간(초)
+  writeTime: [1.6, 3.6],    // 선생님이 판서하는 시간(초, 최소~최대)
+  signalTime: 0.7,          // 돌아보기 전 신호 시간(초)
+  lookTime: [1.2, 2.0],     // 선생님이 돌아보고 있는 시간(초, 최소~최대)
+  fakeChance: 0.4,          // 가짜로 돌아볼 확률(0~1)
+  teacher: { look: "🧐", angry: "😠", fake: "🤨", end: "🙂" },
+  principal: "🧓",
+  players: [
+    { name: "1P", key: "KeyA", keyLabel: "A", snack: "🍪", color: "--p1" },
+    { name: "2P", key: "KeyL", keyLabel: "L", snack: "🍫", color: "--p2" },
+  ],
+  boardTexts: [             // 칠판에 쓰는 글
+    ["오늘의 학습 목표", "바이브코딩으로", "나만의 게임 만들기"],
+    ["게임의 4요소", "목표와 규칙", "도전과 피드백"],
+    ["숙제", "게임 3개 만들어 오기"],
+  ],
+  writeSpeed: 6,            // 칠판에 1초에 쓰는 글자 수
+};
+
+// =====================================================
+//  여기부터는 게임 엔진
+// =====================================================
+const $ = (id) => document.getElementById(id);
+const stage = $("stage");
+const cv = $("cv");
+const ctx = cv.getContext("2d");
+const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+const EMOJI_FONT = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
+const SKIN = "#E9B98F";
+
+let W = 0, H = 0, U = 0, dpr = 1, L = null;
+let colors = {};
+const keys = new Set();
+let state = "start";                 // start → count → play → end → result
+let timeLeft = CONFIG.gameSeconds;
+let countT = 0, countShown = null, lastSecond = null;
+let particles = [], popups = [];
+let shake = 0, flash = 0, elapsed = 0, lastTs = null;
+let fakeAnnounced = false, principalAnnounced = false;
+const wins = [0, 0];
+const teacher = { state: "write", t: 0, dur: 3, turn: 0, angry: false, x: 0, chalkT: 0 };
+const principal = { active: false, state: "hidden", t: 0, dur: 2, slide: 0, angry: false };
+const board = { idx: 0, chars: 0, doneT: 0 };
+const players = CONFIG.players.map((c, i) => ({
+  cfg: c, i, score: 0, eating: false, nomT: 0, caughtT: 0, caughtCount: 0, needRelease: true, color: "#000",
+}));
+
+const rand = (a, b) => a + Math.random() * (b - a);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const totalChars = (i) => CONFIG.boardTexts[i].reduce((s, l) => s + l.length, 0);
+
+function hexA(hex, a) {
+  let h = hex.replace("#", "").trim();
+  if (h.length === 3) h = h.split("").map((c) => c + c).join("");
+  const n = parseInt(h, 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
+
+// ----- 색과 화면 크기 -----
+function readColors() {
+  const cs = getComputedStyle(document.documentElement);
+  const v = (n) => cs.getPropertyValue(n).trim();
+  colors = {
+    ink: v("--ink"), panel: v("--panel"), gold: v("--gold"), alert: v("--alert"), shadow: v("--shadow"),
+    wall: v("--wall"), wallTrim: v("--wall-trim"), floor: v("--floor"), floorLine: v("--floor-line"),
+    board: v("--board"), boardFrame: v("--board-frame"), chalk: v("--chalk"), teacher: v("--teacher"),
+    hair: v("--hair"), desk: v("--desk"), deskEdge: v("--desk-edge"), npc: v("--npc"),
+    glass: v("--glass"), frame: v("--frame"),
+  };
+  players.forEach((p) => (p.color = v(p.cfg.color)));
+}
+
+function layout() {
+  const o = {};
+  o.wallBottom = H * 0.5;
+  o.bx = W * 0.2; o.by = H * 0.06; o.bw = W * 0.6; o.bh = H * 0.3;
+  o.ww = W * 0.09; o.wx = W * 0.865; o.wy = H * 0.09; o.wh = H * 0.25;
+  o.hr = U * 0.05;
+  o.headY = o.by + o.bh * 0.8;
+  o.rows = [
+    { y: H * 0.6, r: U * 0.03, xs: [0.22, 0.41, 0.59, 0.78] },
+    { y: H * 0.71, r: U * 0.037, xs: [0.17, 0.5, 0.83] },
+  ];
+  o.py = H * 0.86; o.pr = U * 0.062; o.px = [W * 0.32, W * 0.68];
+  return o;
+}
+const playerPos = (p) => ({ x: L.px[p.i], y: L.py, r: L.pr });
+
+function resize() {
+  const rect = stage.getBoundingClientRect();
+  const nw = Math.max(1, rect.width), nh = Math.max(1, rect.height);
+  dpr = Math.min(window.devicePixelRatio || 1, 2);
+  cv.width = Math.round(nw * dpr);
+  cv.height = Math.round(nh * dpr);
+  if (W && H) {
+    const sx = nw / W, sy = nh / H;
+    for (const o of [...particles, ...popups]) { o.x *= sx; o.y *= sy; }
+    teacher.x *= sx;
+  }
+  W = nw; H = nh; U = Math.min(W, H);
+  L = layout();
+  if (!teacher.x) teacher.x = L.bx + L.bw * 0.3;
+  sprites.clear();
+}
+
+// ----- 이모지 그리기 -----
+const sprites = new Map();
+function sprite(e, px) {
+  const size = Math.max(8, Math.round(px));
+  const key = e + "|" + size;
+  let c = sprites.get(key);
+  if (!c) {
+    c = document.createElement("canvas");
+    const s = Math.ceil(size * 1.4 * dpr);
+    c.width = c.height = s;
+    const g = c.getContext("2d");
+    g.textAlign = "center";
+    g.textBaseline = "middle";
+    g.font = `${size * dpr}px ${EMOJI_FONT}`;
+    g.fillText(e, s / 2, s / 2 + size * dpr * 0.06);
+    sprites.set(key, c);
+  }
+  return c;
+}
+function drawEmoji(e, x, y, px, rot = 0, sx = 1) {
+  const c = sprite(e, px);
+  const s = c.width / dpr;
+  ctx.save();
+  ctx.translate(x, y);
+  if (rot) ctx.rotate(rot);
+  if (sx !== 1) ctx.scale(sx, 1);
+  ctx.drawImage(c, -s / 2, -s / 2, s, s);
+  ctx.restore();
+}
+
+// ----- 소리 -----
+let actx = null, noiseBuf = null, muted = false;
+function ensureAudio() {
+  if (!actx) {
+    try {
+      actx = new (window.AudioContext || window.webkitAudioContext)();
+      noiseBuf = actx.createBuffer(1, actx.sampleRate, actx.sampleRate);
+      const d = noiseBuf.getChannelData(0);
+      for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    } catch (e) { actx = null; }
+  }
+  if (actx && actx.state === "suspended") actx.resume();
+}
+function tone(freq, dur, type = "square", vol = 0.07, slideTo = null, delay = 0) {
+  if (muted || !actx) return;
+  const t = actx.currentTime + delay;
+  const o = actx.createOscillator();
+  const g = actx.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(freq, t);
+  if (slideTo) o.frequency.exponentialRampToValueAtTime(slideTo, t + dur);
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g).connect(actx.destination);
+  o.start(t);
+  o.stop(t + dur + 0.03);
+}
+function noise(dur, freq, q, vol, delay = 0, freqTo = null) {
+  if (muted || !actx || !noiseBuf) return;
+  const t = actx.currentTime + delay;
+  const src = actx.createBufferSource();
+  src.buffer = noiseBuf;
+  const f = actx.createBiquadFilter();
+  f.type = "bandpass";
+  f.frequency.setValueAtTime(freq, t);
+  if (freqTo) f.frequency.exponentialRampToValueAtTime(freqTo, t + dur);
+  f.Q.value = q;
+  const g = actx.createGain();
+  g.gain.setValueAtTime(vol, t);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(f).connect(g).connect(actx.destination);
+  src.start(t, Math.random() * 0.5);
+  src.stop(t + dur + 0.03);
+}
+const sfx = {
+  chalk: () => noise(0.05, rand(2600, 3800), 6, 0.05),
+  nom: (i) => tone(i ? 620 : 520, 0.06, "triangle", 0.045, i ? 760 : 640),
+  whoosh: () => noise(0.22, 500, 1.2, 0.12, 0, 2200),
+  peek: () => noise(0.3, 300, 1, 0.1, 0, 900),
+  buzz: () => { tone(150, 0.45, "square", 0.08); tone(113, 0.45, "square", 0.06); },
+  alert: () => [880, 660, 880].forEach((f, i) => tone(f, 0.15, "square", 0.05, null, i * 0.16)),
+  siren: () => { for (let i = 0; i < 4; i++) tone(650, 0.24, "sawtooth", 0.05, 980, i * 0.26); },
+  tick: () => tone(900, 0.07, "sine", 0.09),
+  count: () => tone(440, 0.12, "sine", 0.09),
+  go: () => { tone(660, 0.1, "square", 0.07); tone(990, 0.2, "square", 0.07, null, 0.1); },
+  chime: () => [659.25, 523.25, 587.33, 392, 392, 587.33, 659.25, 523.25]
+    .forEach((f, i) => tone(f, 0.9, "triangle", 0.09, null, i * 0.42 + (i >= 4 ? 0.25 : 0))),
+  win: () => [392, 523, 659, 784, 1047].forEach((f, i) => tone(f, 0.2, "triangle", 0.08, null, i * 0.09)),
+};
+
+// ----- 화면 요소 -----
+function showCount(text) {
+  const el = $("count");
+  el.textContent = text;
+  el.classList.toggle("long", text.length > 3);
+  el.classList.remove("pop");
+  void el.offsetWidth;
+  el.classList.add("pop");
+}
+
+let bannerTimer = null;
+function showBanner(title, sub, kind, secs) {
+  const b = $("banner");
+  b.className = "banner " + kind;
+  b.querySelector(".b-title").textContent = title;
+  b.querySelector(".b-sub").textContent = sub;
+  void b.offsetWidth;
+  b.classList.add("show");
+  clearTimeout(bannerTimer);
+  bannerTimer = setTimeout(() => b.classList.remove("show"), secs * 1000);
+}
+
+const hudCache = {};
+function setText(id, val, kick = false) {
+  if (hudCache[id] === val) return;
+  hudCache[id] = val;
+  const el = $(id);
+  el.textContent = val;
+  if (kick && !reduceMotion) {
+    el.classList.remove("kick");
+    void el.offsetWidth;
+    el.classList.add("kick");
+  }
+}
+function updateHUD() {
+  players.forEach((p, i) => {
+    const n = i + 1;
+    setText("s" + n, String(Math.floor(p.score)), true);
+    setText("st" + n, p.caughtT > 0 ? `복도 ${Math.ceil(p.caughtT)}초` : "");
+    setText("w" + n, wins[i] ? `${wins[i]}승` : "");
+  });
+  setText("time", String(Math.max(0, Math.ceil(timeLeft))));
+  $("barFill").style.transform = `scaleX(${clamp(timeLeft / CONFIG.gameSeconds, 0, 1)})`;
+}
+
+function fillScreens() {
+  players.forEach((p, i) => {
+    const n = i + 1;
+    $("face" + n).textContent = p.cfg.snack;
+    $("hint" + n).textContent = `${p.cfg.keyLabel}키`;
+    $("head" + n).textContent = `${p.cfg.name} ${p.cfg.snack}`;
+    $("key" + n).textContent = p.cfg.keyLabel;
+  });
+  const rules = [
+    "분필 소리가 멈추고 말풍선이 뜨면 곧 돌아봐요",
+    `먹다가 걸리면 -${CONFIG.caughtPenalty}점, ${CONFIG.hallwaySeconds}초 동안 복도에 서 있기`,
+    `${CONFIG.gameSeconds}초 동안 더 많이 먹은 사람이 승리`,
+  ];
+  for (const r of rules) {
+    const li = document.createElement("li");
+    li.textContent = r;
+    $("rules").append(li);
+  }
+  if (window.matchMedia("(pointer: coarse)").matches && !window.matchMedia("(pointer: fine)").matches) {
+    $("touchNote").hidden = false;
+  }
+}
+
+// ----- 효과 -----
+function burst(x, y, color, n, power = 1) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const s = U * rand(0.12, 0.5) * power;
+    particles.push({
+      x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - U * 0.2,
+      r: U * rand(0.005, 0.012), color, t: 0, life: rand(0.4, 0.8), g: U * 1.2,
+    });
+  }
+}
+function popup(x, y, text, color, size = 1) { popups.push({ x, y, text, color, size, t: 0, life: 0.9 }); }
+function addShake(n) { if (!reduceMotion) shake = Math.max(shake, n); }
+
+// ----- 칠판과 선생님 -----
+function updateBoard(dt) {
+  const total = totalChars(board.idx);
+  if (board.chars < total) {
+    board.chars = Math.min(total, board.chars + dt * CONFIG.writeSpeed);
+  } else {
+    board.doneT += dt;
+    if (board.doneT > 1.0) {
+      board.idx = (board.idx + 1) % CONFIG.boardTexts.length;
+      board.chars = 0;
+      board.doneT = 0;
+    }
+  }
+}
+function chalkSound(dt) {
+  teacher.chalkT -= dt;
+  if (teacher.chalkT <= 0) { sfx.chalk(); teacher.chalkT = rand(0.1, 0.22); }
+}
+function setTeacher(s, dur) { teacher.state = s; teacher.t = 0; teacher.dur = dur; }
+function writeDur(fakePhase) {
+  const [a, b] = CONFIG.writeTime;
+  return fakePhase ? rand(a * 0.75, b * 0.85) : rand(a, b);
+}
+function holdTeacher(sec) {
+  teacher.turn = 0;
+  teacher.angry = false;
+  setTeacher("write", sec + rand(0.3, 1.0));
+}
+
+function updateTeacher(dt, fakePhase) {
+  const T = teacher;
+  T.t += dt;
+  switch (T.state) {
+    case "write":
+      updateBoard(dt);
+      chalkSound(dt);
+      if (T.t >= T.dur) setTeacher("signal", fakePhase ? CONFIG.signalTime * 0.75 : CONFIG.signalTime);
+      break;
+    case "signal":
+      if (T.t >= T.dur) {
+        sfx.whoosh();
+        if (fakePhase && Math.random() < CONFIG.fakeChance) setTeacher("fake", 0.75);
+        else setTeacher("turn", 0.16);
+      }
+      break;
+    case "fake":
+      T.turn = 0.78 * Math.sin(Math.PI * Math.min(1, T.t / T.dur));
+      if (T.t >= T.dur) { T.turn = 0; setTeacher("write", writeDur(fakePhase)); }
+      break;
+    case "turn":
+      T.turn = Math.min(1, T.t / T.dur);
+      if (T.t >= T.dur) { T.turn = 1; T.angry = false; setTeacher("look", rand(CONFIG.lookTime[0], CONFIG.lookTime[1])); }
+      break;
+    case "look":
+      if (T.t >= T.dur) setTeacher("back", 0.2);
+      break;
+    case "back":
+      T.turn = 1 - Math.min(1, T.t / T.dur);
+      if (T.t >= T.dur) { T.turn = 0; T.angry = false; setTeacher("write", writeDur(fakePhase)); }
+      break;
+  }
+}
+
+function updatePrincipal(dt) {
+  const P = principal;
+  if (!P.active) return;
+  P.t += dt;
+  if (P.state === "hidden" && P.t >= P.dur) {
+    P.state = "in"; P.t = 0; P.dur = 0.35; P.angry = false; sfx.peek();
+  } else if (P.state === "in") {
+    P.slide = Math.min(1, P.t / P.dur);
+    if (P.t >= P.dur) { P.state = "watch"; P.t = 0; P.dur = rand(1.0, 1.5); P.slide = 1; }
+  } else if (P.state === "watch" && P.t >= P.dur) {
+    P.state = "out"; P.t = 0; P.dur = 0.3;
+  } else if (P.state === "out") {
+    P.slide = 1 - Math.min(1, P.t / P.dur);
+    if (P.t >= P.dur) { P.state = "hidden"; P.t = 0; P.dur = rand(1.2, 2.6); P.slide = 0; }
+  }
+}
+
+// ----- 학생 -----
+function nom(p) {
+  const { x, y, r } = playerPos(p);
+  popup(x + r * 1.3, y - r * 0.6, "냠", p.color, 0.7);
+  burst(x + r * 1.15, y + r * 0.3, colors.deskEdge, 4, 0.5);
+  sfx.nom(p.i);
+}
+
+function updatePlayers(dt) {
+  const teacherW = teacher.state === "look" && teacher.t > 0.06;
+  const principalW = principal.active && principal.state === "watch" && principal.t > 0.05;
+  const caughtNow = [];
+  for (const p of players) {
+    const held = keys.has(p.cfg.key);
+    if (!held) p.needRelease = false;
+    if (p.caughtT > 0) {
+      p.eating = false;
+      p.caughtT -= dt;
+      if (p.caughtT <= 0) { p.caughtT = 0; p.needRelease = true; }
+      continue;
+    }
+    p.eating = held && !p.needRelease;
+    if (!p.eating) { p.nomT = 0.08; continue; }
+    if (teacherW || principalW) { caughtNow.push({ p, by: teacherW ? "teacher" : "principal" }); continue; }
+    p.score += CONFIG.eatPerSecond * dt;
+    p.nomT -= dt;
+    if (p.nomT <= 0) { p.nomT = 0.4; nom(p); }
+  }
+  if (caughtNow.length) handleCaught(caughtNow);
+}
+
+function handleCaught(list) {
+  for (const { p } of list) {
+    p.score = Math.max(0, p.score - CONFIG.caughtPenalty);
+    p.caughtT = CONFIG.hallwaySeconds;
+    p.caughtCount++;
+    p.eating = false;
+    p.needRelease = true;
+    const { x, y, r } = playerPos(p);
+    popup(x, y - r * 1.4, "-" + CONFIG.caughtPenalty, colors.alert, 1.5);
+  }
+  const byTeacher = list.some((c) => c.by === "teacher");
+  if (byTeacher) teacher.angry = true; else principal.angry = true;
+  const who = list.length === 2 ? "둘 다" : list[0].p.cfg.name;
+  showBanner(
+    byTeacher ? `${who} 딱 걸렸다!` : `${who} 교감선생님께 걸렸다!`,
+    `-${CONFIG.caughtPenalty}점, ${CONFIG.hallwaySeconds}초 동안 복도로`,
+    "alert", 1.6
+  );
+  flash = 1;
+  addShake(14);
+  sfx.buzz();
+}
+
+// ----- 게임 흐름 -----
+function startGame() {
+  if (state !== "start" && state !== "result") return;
+  ensureAudio();
+  players.forEach((p) => { p.score = 0; p.eating = false; p.caughtT = 0; p.caughtCount = 0; p.needRelease = true; p.nomT = 0; });
+  particles = []; popups = [];
+  shake = 0; flash = 0;
+  timeLeft = CONFIG.gameSeconds; lastSecond = null;
+  fakeAnnounced = false; principalAnnounced = false;
+  teacher.turn = 0; teacher.angry = false; setTeacher("write", 99);
+  Object.assign(principal, { active: false, state: "hidden", t: 0, dur: 2, slide: 0, angry: false });
+  $("startScreen").hidden = true;
+  $("endScreen").hidden = true;
+  $("banner").classList.remove("show");
+  $("clock").classList.remove("hurry");
+  if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+  state = "count"; countT = 3; countShown = null;
+}
+
+function finish() {
+  state = "end";
+  teacher.turn = 1; teacher.angry = false; setTeacher("end", 99);
+  Object.assign(principal, { active: false, state: "hidden", slide: 0 });
+  players.forEach((p) => { p.eating = false; p.caughtT = 0; });
+  $("clock").classList.remove("hurry");
+  const s = players.map((p) => Math.floor(p.score));
+  const winner = s[0] === s[1] ? -1 : s[0] > s[1] ? 0 : 1;
+  if (winner >= 0) {
+    wins[winner]++;
+    const { x, y } = playerPos(players[winner]);
+    burst(x, y, players[winner].color, 40, 1.3);
+    burst(x, y, colors.gold, 30, 1.1);
+  }
+  showCount("수업 끝!");
+  sfx.chime();
+  setTimeout(() => showResult(winner, s), 1800);
+}
+
+function showTally() {
+  $("tally").textContent = `전적: ${players[0].cfg.name} ${wins[0]}승, ${players[1].cfg.name} ${wins[1]}승`;
+}
+
+function showResult(winner, s) {
+  const w = $("winner");
+  if (winner < 0) {
+    $("kicker").textContent = "사이좋게 나눠 먹기";
+    w.textContent = "무승부!";
+    w.className = "winner";
+  } else {
+    $("kicker").textContent = "오늘의 간식왕은";
+    w.textContent = `${players[winner].cfg.name} 승리!`;
+    w.className = "winner " + (winner === 0 ? "p1" : "p2");
+  }
+  $("ff1").textContent = players[0].cfg.snack;
+  $("ff2").textContent = players[1].cfg.snack;
+  $("f1").textContent = s[0];
+  $("f2").textContent = s[1];
+  $("caught").textContent = `걸린 횟수: ${players[0].cfg.name} ${players[0].caughtCount}번, ${players[1].cfg.name} ${players[1].caughtCount}번`;
+  showTally();
+  $("endScreen").hidden = false;
+  state = "result";
+  sfx.win();
+  $("againBtn").focus({ preventScroll: true });
+}
+
+function update(dt) {
+  if (state === "start" || state === "count") {
+    updateBoard(dt);
+    if (state === "count") chalkSound(dt);
+  }
+  if (state === "count") {
+    countT -= dt;
+    const n = Math.ceil(countT);
+    if (n !== countShown) {
+      countShown = n;
+      if (n > 0) { showCount(String(n)); sfx.count(); }
+      else {
+        showCount("시작!");
+        sfx.go();
+        state = "play";
+        setTeacher("write", rand(2.0, 3.0));
+        players.forEach((p) => (p.needRelease = false));
+      }
+    }
+    return;
+  }
+  if (state !== "play") return;
+
+  timeLeft -= dt;
+  const fakePhase = timeLeft <= CONFIG.fakeFrom;
+
+  // 반전 1: 선생님이 가짜로 돌아보기 시작
+  if (!fakeAnnounced && fakePhase) {
+    fakeAnnounced = true;
+    showBanner("🤨 선생님이 수상해졌다!", "돌아보는 척만 할 수도 있어요", "alert", 2.2);
+    holdTeacher(2.4);
+    sfx.alert();
+  }
+  // 반전 2: 교감선생님 순찰
+  if (!principalAnnounced && timeLeft <= CONFIG.principalFrom) {
+    principalAnnounced = true;
+    Object.assign(principal, { active: true, state: "hidden", t: 0, dur: rand(2.6, 3.4), slide: 0 });
+    showBanner("🚨 교감선생님 순찰 중!", "창문도 조심하세요", "alert", 2.2);
+    holdTeacher(2.4);
+    sfx.siren();
+  }
+  // 마지막 5초
+  const sec = Math.ceil(timeLeft);
+  if (sec !== lastSecond) {
+    lastSecond = sec;
+    if (sec <= 5 && sec > 0) { sfx.tick(); $("clock").classList.add("hurry"); }
+  }
+  if (timeLeft <= 0) { timeLeft = 0; finish(); return; }
+
+  updateTeacher(dt, fakePhase);
+  updatePrincipal(dt);
+  updatePlayers(dt);
+}
+
+function updateFx(dt) {
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const q = particles[i];
+    q.t += dt; q.vy += q.g * dt; q.x += q.vx * dt; q.y += q.vy * dt;
+    if (q.t >= q.life) particles.splice(i, 1);
+  }
+  for (let i = popups.length - 1; i >= 0; i--) {
+    const q = popups[i];
+    q.t += dt; q.y -= U * 0.16 * dt;
+    if (q.t >= q.life) popups.splice(i, 1);
+  }
+  if (shake > 0) shake = Math.max(0, shake - dt * 45);
+  if (flash > 0) flash = Math.max(0, flash - dt * 2.5);
+}
+
+// ----- 그리기 -----
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+function circle(x, y, r) { ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+function outlinedText(text, x, y, px, fill) {
+  ctx.font = `${Math.round(px)}px "Black Han Sans", sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.lineJoin = "round";
+  ctx.lineWidth = Math.max(3, px * 0.18);
+  ctx.strokeStyle = colors.panel;
+  ctx.strokeText(text, x, y);
+  ctx.fillStyle = fill;
+  ctx.fillText(text, x, y);
+}
+
+function drawRoom() {
+  ctx.fillStyle = colors.wall;
+  ctx.fillRect(-40, -40, W + 80, L.wallBottom + 40);
+  ctx.fillStyle = colors.wallTrim;
+  ctx.fillRect(-40, L.wallBottom - H * 0.05, W + 80, H * 0.05);
+  ctx.fillStyle = colors.floor;
+  ctx.fillRect(-40, L.wallBottom, W + 80, H - L.wallBottom + 40);
+  ctx.strokeStyle = colors.floorLine;
+  ctx.lineWidth = 2;
+  const plank = Math.max(18, H * 0.05);
+  for (let y = L.wallBottom + plank; y < H + 40; y += plank) {
+    ctx.beginPath(); ctx.moveTo(-40, y); ctx.lineTo(W + 40, y); ctx.stroke();
+  }
+  const f = Math.max(6, U * 0.014);
+  ctx.fillStyle = colors.boardFrame;
+  roundRect(L.bx - f, L.by - f, L.bw + f * 2, L.bh + f * 2, f);
+  ctx.fill();
+  ctx.fillStyle = colors.board;
+  ctx.fillRect(L.bx, L.by, L.bw, L.bh);
+  ctx.fillStyle = colors.boardFrame;
+  ctx.fillRect(L.bx - f * 1.5, L.by + L.bh + f * 0.6, L.bw + f * 3, f * 1.2);
+}
+
+function drawWindow() {
+  const { wx, wy, ww, wh } = L;
+  const fr = Math.max(4, U * 0.01);
+  ctx.fillStyle = colors.frame;
+  ctx.fillRect(wx - fr, wy - fr, ww + fr * 2, wh + fr * 2);
+  ctx.fillStyle = colors.glass;
+  ctx.fillRect(wx, wy, ww, wh);
+  if (principal.slide > 0) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(wx, wy, ww, wh); ctx.clip();
+    const size = Math.min(ww, wh) * 0.85;
+    const py = wy + wh * 0.6 + (1 - principal.slide) * wh * 0.9;
+    const jitter = principal.angry ? Math.sin(elapsed * 40) * size * 0.04 : 0;
+    drawEmoji(CONFIG.principal, wx + ww / 2 + jitter, py, size);
+    ctx.restore();
+  }
+  ctx.fillStyle = colors.frame;
+  ctx.fillRect(wx, wy + wh * 0.22, ww, fr);
+}
+
+function drawBoardText() {
+  const lines = CONFIG.boardTexts[board.idx];
+  const fs = Math.min(L.bh * 0.17, L.bw * 0.065);
+  ctx.font = `${Math.round(fs)}px "Jua", sans-serif`;
+  ctx.textAlign = "left";
+  ctx.textBaseline = "middle";
+  ctx.fillStyle = colors.chalk;
+  const x0 = L.bx + L.bw * 0.07;
+  let remaining = Math.floor(board.chars);
+  let cx = x0, cy = L.by + L.bh * 0.22;
+  for (let i = 0; i < lines.length; i++) {
+    const y = L.by + L.bh * 0.22 + i * fs * 1.35;
+    if (remaining <= 0) break;
+    const s = lines[i].slice(0, Math.min(lines[i].length, remaining));
+    ctx.fillText(s, x0, y);
+    cx = x0 + ctx.measureText(s).width;
+    cy = y;
+    remaining -= s.length;
+  }
+  return { x: cx, y: cy };
+}
+
+function teacherFace() {
+  if (teacher.state === "end") return CONFIG.teacher.end;
+  if (teacher.angry) return CONFIG.teacher.angry;
+  if (teacher.state === "fake") return CONFIG.teacher.fake;
+  return CONFIG.teacher.look;
+}
+
+function drawTeacher(chalk) {
+  const T = teacher, hr = L.hr;
+  const target = clamp(chalk.x + hr * 1.4, L.bx + hr * 1.6, L.bx + L.bw + hr * 0.6);
+  T.x += (target - T.x) * 0.08;
+  const tx = T.x;
+  const bob = T.state === "write" && state !== "start" ? Math.sin(elapsed * 9) * hr * 0.04 : 0;
+  const hy = L.headY + bob;
+  // 몸
+  ctx.fillStyle = colors.teacher;
+  roundRect(tx - hr * 1.35, hy + hr * 0.7, hr * 2.7, L.wallBottom + H * 0.05 - (hy + hr * 0.7), hr * 0.8);
+  ctx.fill();
+  // 판서하는 팔
+  const armUp = T.turn < 0.5 && (T.state === "write" || T.state === "signal" || T.state === "fake");
+  if (armUp) {
+    const wob = T.state === "write" ? Math.sin(elapsed * 22) * hr * 0.08 : 0;
+    ctx.strokeStyle = colors.teacher;
+    ctx.lineCap = "round";
+    ctx.lineWidth = hr * 0.5;
+    ctx.beginPath();
+    ctx.moveTo(tx - hr * 0.95, hy + hr * 1.25);
+    ctx.lineTo(chalk.x + hr * 0.15, chalk.y + hr * 0.25 + wob);
+    ctx.stroke();
+    ctx.fillStyle = SKIN;
+    circle(chalk.x + hr * 0.12, chalk.y + hr * 0.2 + wob, hr * 0.22);
+  }
+  // 머리: 뒤통수 ↔ 얼굴로 돌아보기
+  if (T.turn < 0.5) {
+    const sx = Math.max(0.05, 1 - T.turn * 2);
+    ctx.save();
+    ctx.translate(tx, hy);
+    ctx.scale(sx, 1);
+    ctx.fillStyle = SKIN;
+    circle(-hr * 0.95, hr * 0.12, hr * 0.22);
+    circle(hr * 0.95, hr * 0.12, hr * 0.22);
+    ctx.fillStyle = colors.hair;
+    circle(0, 0, hr);
+    ctx.restore();
+  } else {
+    const sx = Math.max(0.05, T.turn * 2 - 1);
+    const scan = T.state === "look" && !T.angry ? Math.sin(elapsed * 5) * hr * 0.15 : 0;
+    const jitter = T.angry ? Math.sin(elapsed * 40) * hr * 0.06 : 0;
+    drawEmoji(teacherFace(), tx + scan + jitter, hy, hr * 2.3, 0, sx);
+  }
+  // 돌아보기 전 신호
+  if (T.state === "signal" && state === "play") {
+    const pulse = 1 + Math.sin(elapsed * 20) * 0.06;
+    const bw = hr * 1.9 * pulse, bh = hr * 1.15 * pulse;
+    const bx = tx + hr * 0.8, by = hy - hr * 2.1;
+    ctx.fillStyle = colors.panel;
+    ctx.strokeStyle = colors.alert;
+    ctx.lineWidth = Math.max(3, hr * 0.12);
+    roundRect(bx, by, bw, bh, bh / 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = colors.alert;
+    ctx.font = `${Math.round(hr * 0.9)}px "Black Han Sans", sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("…", bx + bw / 2, by + bh * 0.42);
+  }
+}
+
+function drawDesk(x, y, r) {
+  ctx.fillStyle = colors.desk;
+  roundRect(x - r * 2.3, y - r * 1.6, r * 4.6, r * 1.2, r * 0.2);
+  ctx.fill();
+  ctx.fillStyle = colors.deskEdge;
+  ctx.fillRect(x - r * 2.3, y - r * 0.5, r * 4.6, r * 0.16);
+}
+
+function drawNPC(x, y, r) {
+  drawDesk(x, y, r);
+  ctx.fillStyle = colors.npc;
+  roundRect(x - r * 1.55, y + r * 0.35, r * 3.1, r * 2.6, r * 0.9);
+  ctx.fill();
+  ctx.fillStyle = colors.hair;
+  circle(x, y + Math.sin(elapsed * 1.6 + x) * r * 0.03, r);
+}
+
+function drawKeycap(x, y, s, label, color) {
+  ctx.fillStyle = colors.panel;
+  ctx.strokeStyle = color;
+  ctx.lineWidth = Math.max(2, s * 0.08);
+  roundRect(x - s / 2, y - s / 2, s, s, s * 0.2);
+  ctx.fill();
+  ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.font = `${Math.round(s * 0.6)}px "Black Han Sans", sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(label, x, y + s * 0.04);
+}
+
+function drawPlayer(p) {
+  const { x, y, r } = playerPos(p);
+  drawDesk(x, y, r);
+  drawKeycap(x - r * 1.7, y - r * 1.0, r * 0.62, p.cfg.keyLabel, p.color);
+  ctx.fillStyle = p.color;
+  roundRect(x - r * 1.55, y + r * 0.35, r * 3.1, r * 2.6, r * 0.9);
+  ctx.fill();
+  ctx.fillStyle = colors.panel;
+  ctx.font = `${Math.round(r * 0.7)}px "Black Han Sans", sans-serif`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(p.cfg.name, x, y + r * 1.4);
+  if (p.caughtT > 0) {
+    drawEmoji("😭", x, y, r * 2.2);
+    const label = `복도 ${Math.ceil(p.caughtT)}`;
+    ctx.font = `${Math.round(r * 0.55)}px "Black Han Sans", sans-serif`;
+    const tw = ctx.measureText(label).width + r * 0.6, th = r * 0.75;
+    ctx.fillStyle = colors.alert;
+    roundRect(x - tw / 2, y - r * 2.1, tw, th, th / 2);
+    ctx.fill();
+    ctx.fillStyle = colors.panel;
+    ctx.fillText(label, x, y - r * 2.1 + th / 2 + 1);
+    return;
+  }
+  const bob = p.eating ? Math.sin(elapsed * 16) * r * 0.08 : 0;
+  const hy = y + (p.eating ? r * 0.14 : 0) + bob;
+  ctx.fillStyle = colors.hair;
+  circle(x, hy, r);
+  if (p.eating) drawEmoji(p.cfg.snack, x + r * 1.15, hy + r * 0.35 - bob * 2, r * 1.0, Math.sin(elapsed * 16) * 0.2);
+}
+
+function render() {
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  if (shake > 0) ctx.translate(rand(-shake, shake), rand(-shake, shake));
+  drawRoom();
+  drawWindow();
+  const chalk = drawBoardText();
+  drawTeacher(chalk);
+  for (const row of L.rows) for (const fx of row.xs) drawNPC(W * fx, row.y, row.r);
+  for (const p of players) drawPlayer(p);
+  for (const q of particles) {
+    ctx.globalAlpha = Math.max(0, 1 - q.t / q.life);
+    ctx.fillStyle = q.color;
+    circle(q.x, q.y, q.r);
+  }
+  for (const q of popups) {
+    const k = q.t / q.life;
+    ctx.globalAlpha = Math.max(0, 1 - k * k);
+    outlinedText(q.text, q.x, q.y, U * 0.06 * q.size, q.color);
+  }
+  ctx.globalAlpha = 1;
+  ctx.restore();
+  if (flash > 0) {
+    ctx.fillStyle = hexA(colors.alert, flash * 0.3);
+    ctx.fillRect(0, 0, W, H);
+  }
+}
+
+function frame(ts) {
+  if (lastTs === null) lastTs = ts;
+  const dt = Math.min(0.05, (ts - lastTs) / 1000);
+  lastTs = ts;
+  elapsed += dt;
+  update(dt);
+  updateFx(dt);
+  updateHUD();
+  render();
+  requestAnimationFrame(frame);
+}
+
+// ----- 키보드와 버튼 -----
+window.addEventListener("keydown", (e) => {
+  const onButton = e.target instanceof Element && e.target.closest("button");
+  keys.add(e.code);
+  if (e.repeat) return;
+  if (!onButton && (e.code === "Space" || e.code === "Enter" || e.code === "NumpadEnter")) {
+    e.preventDefault();
+    startGame();
+  }
+  if (e.code === "KeyM") toggleMute();
+});
+window.addEventListener("keyup", (e) => keys.delete(e.code));
+window.addEventListener("blur", () => keys.clear());
+
+function toggleMute() {
+  muted = !muted;
+  const b = $("mute");
+  b.textContent = muted ? "🔇" : "🔊";
+  b.setAttribute("aria-label", muted ? "소리 켜기" : "소리 끄기");
+}
+$("mute").addEventListener("click", () => { ensureAudio(); toggleMute(); $("mute").blur(); });
+$("startBtn").addEventListener("click", startGame);
+$("againBtn").addEventListener("click", startGame);
+$("resetBtn").addEventListener("click", () => { wins[0] = wins[1] = 0; showTally(); });
+
+// ----- 시작 -----
+readColors();
+resize();
+fillScreens();
+window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { sprites.clear(); readColors(); });
+new ResizeObserver(() => resize()).observe(stage);
+requestAnimationFrame(frame);
+</script>
+</body>
+</html>
